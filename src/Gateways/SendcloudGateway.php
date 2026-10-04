@@ -26,18 +26,14 @@ class SendcloudGateway extends Gateway
 {
     use HasHttpRequest;
 
-    const ENDPOINT_TEMPLATE = 'http://www.sendcloud.net/smsapi/%s';
+    public const ENDPOINT_TEMPLATE = 'http://www.sendcloud.net/smsapi/%s';
 
     /**
      * Send a short message.
      *
-     * @param \Overtrue\EasySms\Contracts\PhoneNumberInterface $to
-     * @param \Overtrue\EasySms\Contracts\MessageInterface     $message
-     * @param \Overtrue\EasySms\Support\Config                 $config
-     *
      * @return array
      *
-     * @throws \Overtrue\EasySms\Exceptions\GatewayErrorException
+     * @throws GatewayErrorException
      */
     public function send(PhoneNumberInterface $to, MessageInterface $message, Config $config)
     {
@@ -57,7 +53,7 @@ class SendcloudGateway extends Gateway
 
         $result = $this->post(sprintf(self::ENDPOINT_TEMPLATE, 'send'), $params);
 
-        if (!$result['result']) {
+        if (! $result['result']) {
             throw new GatewayErrorException($result['message'], $result['statusCode'], $result);
         }
 
@@ -65,8 +61,6 @@ class SendcloudGateway extends Gateway
     }
 
     /**
-     * @param array $vars
-     *
      * @return string
      */
     protected function formatTemplateVars(array $vars)
@@ -81,9 +75,8 @@ class SendcloudGateway extends Gateway
     }
 
     /**
-     * @param array  $params
-     * @param string $key
-     *
+     * @param  array  $params
+     * @param  string  $key
      * @return string
      */
     protected function sign($params, $key)

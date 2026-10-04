@@ -20,7 +20,7 @@ use Overtrue\EasySms\Tests\TestCase;
 
 class YunxinGatewayTest extends TestCase
 {
-    public function testSendWithSendCode()
+    public function test_send_with_send_code()
     {
         $config = [
             'app_key' => 'mock-app-key',
@@ -48,7 +48,7 @@ class YunxinGatewayTest extends TestCase
             ->andReturn('mock-params');
 
         $gateway->shouldReceive('post')
-            ->with('https://api.netease.im/sms/sendcode.action', 'mock-params', 'mock-headers')
+            ->with('https://sms.yunxinapi.com/sms/sendcode.action', 'mock-params', 'mock-headers')
             ->andReturn([
                 'code' => 200,
                 'msg' => 5,
@@ -72,7 +72,7 @@ class YunxinGatewayTest extends TestCase
         $gateway->send($phone, $message, $config);
     }
 
-    public function testSendWithVerifyCode()
+    public function test_send_with_verify_code()
     {
         $config = [
             'app_key' => 'mock-app-key',
@@ -103,7 +103,7 @@ class YunxinGatewayTest extends TestCase
             ->andReturn('mock-params');
 
         $gateway->shouldReceive('post')
-            ->with('https://api.netease.im/sms/verifycode.action', 'mock-params', 'mock-headers')
+            ->with('https://sms.yunxinapi.com/sms/verifycode.action', 'mock-params', 'mock-headers')
             ->andReturn([
                 'code' => 200,
             ], [
@@ -123,7 +123,62 @@ class YunxinGatewayTest extends TestCase
         $gateway->send($phone, $message, $config);
     }
 
-    public function testBuildEndpoint()
+    public function test_send_with_template_msg()
+    {
+        $config = [
+            'app_key' => 'mock-app-key',
+            'app_secret' => 'mock-app-secret',
+        ];
+
+        $gateway = \Mockery::mock(YunxinGateway::class.'[post,buildHeaders,buildTemplateParams]', [$config]);
+        $gateway->shouldAllowMockingProtectedMethods();
+
+        $phone = new PhoneNumber('18888888888');
+
+        $message = new Message([
+            'template' => 'mock-template-code',
+            'data' => [
+                'params' => ['1'],
+                'action' => 'sendTemplate',
+            ],
+        ]);
+
+        $config = new Config($config);
+
+        $gateway->shouldReceive('buildHeaders')
+            ->with($config)
+            ->andReturn('mock-headers');
+
+        $gateway->shouldReceive('buildTemplateParams')
+            ->with($phone, $message, $config)
+            ->andReturn('mock-params');
+
+        $gateway->shouldReceive('post')
+            ->with('https://sms.yunxinapi.com/sms/sendtemplate.action', 'mock-params', 'mock-headers')
+            ->andReturn([
+                'code' => 200,
+                'msg' => 5,
+                'obj' => 6379,
+            ], [
+                'code' => 414,
+                'msg' => 'checksum',
+            ])
+            ->twice();
+
+        $this->assertSame([
+            'code' => 200,
+            'msg' => 5,
+            'obj' => 6379,
+        ], $gateway->send($phone, $message, $config));
+
+        $this->expectException(GatewayErrorException::class);
+        $this->expectExceptionCode(414);
+        $this->expectExceptionMessage('checksum');
+
+        $gateway->send($phone, $message, $config);
+    }
+
+    public function test_build_endpoint()
     {
         $config = [
             'app_key' => 'mock-app-key',
@@ -131,22 +186,21 @@ class YunxinGatewayTest extends TestCase
         ];
 
         $method = new \ReflectionMethod(YunxinGateway::class, 'buildEndpoint');
-        $method->setAccessible(true);
 
         $gateway = \Mockery::mock(YunxinGateway::class, [$config])->shouldAllowMockingProtectedMethods();
 
         $this->assertSame(
-            'https://api.netease.im/sms/sendcode.action',
+            'https://sms.yunxinapi.com/sms/sendcode.action',
             $method->invoke($gateway, 'sms', 'sendCode')
         );
 
         $this->assertSame(
-            'https://api.netease.im/mock-resource/mock-function.action',
+            'https://sms.yunxinapi.com/mock-resource/mock-function.action',
             $method->invoke($gateway, 'mock-resource', 'mock-function')
         );
     }
 
-    public function testBuildHeaders()
+    public function test_build_headers()
     {
         $config = [
             'app_key' => 'mock-app-key',
@@ -154,7 +208,6 @@ class YunxinGatewayTest extends TestCase
         ];
 
         $method = new \ReflectionMethod(YunxinGateway::class, 'buildHeaders');
-        $method->setAccessible(true);
 
         $gateway = \Mockery::mock(YunxinGateway::class, [$config])->shouldAllowMockingProtectedMethods();
 
@@ -168,7 +221,7 @@ class YunxinGatewayTest extends TestCase
         $this->assertSame($checkSum, $headers['CheckSum']);
     }
 
-    public function testBuildSendCodeParams()
+    public function test_build_send_code_params()
     {
         $config = [
             'app_key' => 'mock-app-key',
@@ -178,7 +231,6 @@ class YunxinGatewayTest extends TestCase
         ];
 
         $method = new \ReflectionMethod(YunxinGateway::class, 'buildSendCodeParams');
-        $method->setAccessible(true);
 
         $gateway = \Mockery::mock(YunxinGateway::class, [$config])->shouldAllowMockingProtectedMethods();
 
@@ -204,7 +256,7 @@ class YunxinGatewayTest extends TestCase
         ], $method->invoke($gateway, $phone, $message, $config));
     }
 
-    public function testBuildVerifyCodeParams()
+    public function test_build_verify_code_params()
     {
         $config = [
             'app_key' => 'mock-app-key',
@@ -212,7 +264,6 @@ class YunxinGatewayTest extends TestCase
         ];
 
         $method = new \ReflectionMethod(YunxinGateway::class, 'buildVerifyCodeParams');
-        $method->setAccessible(true);
 
         $gateway = \Mockery::mock(YunxinGateway::class, [$config])->shouldAllowMockingProtectedMethods();
 

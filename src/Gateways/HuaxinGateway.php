@@ -26,16 +26,12 @@ class HuaxinGateway extends Gateway
 {
     use HasHttpRequest;
 
-    const ENDPOINT_TEMPLATE = 'http://%s/smsJson.aspx';
+    public const ENDPOINT_TEMPLATE = 'http://%s/smsJson.aspx';
 
     /**
-     * @param \Overtrue\EasySms\Contracts\PhoneNumberInterface $to
-     * @param \Overtrue\EasySms\Contracts\MessageInterface     $message
-     * @param \Overtrue\EasySms\Support\Config                 $config
-     *
      * @return array
      *
-     * @throws \Overtrue\EasySms\Exceptions\GatewayErrorException ;
+     * @throws GatewayErrorException ;
      */
     public function send(PhoneNumberInterface $to, MessageInterface $message, Config $config)
     {
@@ -52,7 +48,7 @@ class HuaxinGateway extends Gateway
             'extno' => $config->get('ext_no'),
         ]);
 
-        if ('Success' !== $result['returnstatus']) {
+        if ($result['returnstatus'] !== 'Success') {
             throw new GatewayErrorException($result['message'], 400, $result);
         }
 
@@ -62,8 +58,7 @@ class HuaxinGateway extends Gateway
     /**
      * Build endpoint url.
      *
-     * @param string $ip
-     *
+     * @param  string  $ip
      * @return string
      */
     protected function buildEndpoint($ip)

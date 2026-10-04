@@ -11,7 +11,7 @@ use Overtrue\EasySms\Tests\TestCase;
 
 class NowcnGatewaysTest extends TestCase
 {
-    public function testSend()
+    public function test_send()
     {
         $config = [
             'key' => '1',
@@ -19,19 +19,19 @@ class NowcnGatewaysTest extends TestCase
             'api_type' => '3',
         ];
 
-        $gateway = \Mockery::mock(NowcnGateway::class . '[request]', [$config])->shouldAllowMockingProtectedMethods();
+        $gateway = \Mockery::mock(NowcnGateway::class.'[request]', [$config])->shouldAllowMockingProtectedMethods();
         $gateway->shouldReceive('request')->with(
             'get',
             \Mockery::on(function ($api) {
-                return 0 === strpos($api, NowcnGateway::ENDPOINT_URL);
+                return strpos($api, NowcnGateway::ENDPOINT_URL) === 0;
             }),
             \Mockery::on(function ($params) {
                 return true;
             })
-        ) ->andReturn([
+        )->andReturn([
             'code' => NowcnGateway::SUCCESS_CODE,
         ], [
-            'code' => "-4",
+            'code' => '-4',
             'msg' => 'authorize failed',
         ])->times(2);
 
@@ -47,6 +47,5 @@ class NowcnGatewaysTest extends TestCase
         $this->expectExceptionCode(-4);
         $this->expectExceptionMessage('authorize failed');
         $gateway->send(new PhoneNumber(18888888888), $message, $config);
-
     }
 }

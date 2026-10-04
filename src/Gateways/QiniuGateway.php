@@ -26,18 +26,14 @@ class QiniuGateway extends Gateway
 {
     use HasHttpRequest;
 
-    const ENDPOINT_TEMPLATE = 'https://%s.qiniuapi.com/%s/%s';
+    public const ENDPOINT_TEMPLATE = 'https://%s.qiniuapi.com/%s/%s';
 
-    const ENDPOINT_VERSION = 'v1';
+    public const ENDPOINT_VERSION = 'v1';
 
     /**
-     * @param \Overtrue\EasySms\Contracts\PhoneNumberInterface $to
-     * @param \Overtrue\EasySms\Contracts\MessageInterface     $message
-     * @param \Overtrue\EasySms\Support\Config                 $config
-     *
      * @return array
      *
-     * @throws \Overtrue\EasySms\Exceptions\GatewayErrorException ;
+     * @throws GatewayErrorException ;
      */
     public function send(PhoneNumberInterface $to, MessageInterface $message, Config $config)
     {
@@ -50,7 +46,7 @@ class QiniuGateway extends Gateway
             'mobile' => $to->getNumber(),
         ];
 
-        if (!empty($data)) {
+        if (! empty($data)) {
             $params['parameters'] = $data;
         }
 
@@ -72,9 +68,8 @@ class QiniuGateway extends Gateway
     /**
      * Build endpoint url.
      *
-     * @param string $type
-     * @param string $function
-     *
+     * @param  string  $type
+     * @param  string  $function
      * @return string
      */
     protected function buildEndpoint($type, $function)
@@ -85,12 +80,10 @@ class QiniuGateway extends Gateway
     /**
      * Build endpoint url.
      *
-     * @param string $url
-     * @param string $method
-     * @param string $body
-     * @param string $contentType
-     * @param Config $config
-     *
+     * @param  string  $url
+     * @param  string  $method
+     * @param  string  $body
+     * @param  string  $contentType
      * @return string
      */
     protected function generateSign($url, $method, $body, $contentType, Config $config)
@@ -108,23 +101,23 @@ class QiniuGateway extends Gateway
         } else {
             $query = '';
         }
-        //write request uri
+        // write request uri
         $toSignStr = $method.' '.$path;
-        if (!empty($query)) {
+        if (! empty($query)) {
             $toSignStr .= '?'.$query;
         }
-        //write host and port
+        // write host and port
         $toSignStr .= "\nHost: ".$host;
-        if (!empty($port)) {
+        if (! empty($port)) {
             $toSignStr .= ':'.$port;
         }
-        //write content type
-        if (!empty($contentType)) {
+        // write content type
+        if (! empty($contentType)) {
             $toSignStr .= "\nContent-Type: ".$contentType;
         }
         $toSignStr .= "\n\n";
-        //write body
-        if (!empty($body)) {
+        // write body
+        if (! empty($body)) {
             $toSignStr .= $body;
         }
 
@@ -134,14 +127,13 @@ class QiniuGateway extends Gateway
     }
 
     /**
-     * @param string $data
-     *
+     * @param  string  $data
      * @return string
      */
     protected function base64UrlSafeEncode($data)
     {
-        $find = array('+', '/');
-        $replace = array('-', '_');
+        $find = ['+', '/'];
+        $replace = ['-', '_'];
 
         return str_replace($find, $replace, base64_encode($data));
     }

@@ -13,6 +13,7 @@ namespace Overtrue\EasySms;
 
 use Overtrue\EasySms\Contracts\MessageInterface;
 use Overtrue\EasySms\Contracts\PhoneNumberInterface;
+use Overtrue\EasySms\Exceptions\InvalidArgumentException;
 use Overtrue\EasySms\Exceptions\NoGatewayAvailableException;
 
 /**
@@ -20,19 +21,14 @@ use Overtrue\EasySms\Exceptions\NoGatewayAvailableException;
  */
 class Messenger
 {
-    const STATUS_SUCCESS = 'success';
+    public const STATUS_SUCCESS = 'success';
 
-    const STATUS_FAILURE = 'failure';
+    public const STATUS_FAILURE = 'failure';
 
-    /**
-     * @var \Overtrue\EasySms\EasySms
-     */
-    protected $easySms;
+    protected EasySms $easySms;
 
     /**
      * Messenger constructor.
-     *
-     * @param \Overtrue\EasySms\EasySms $easySms
      */
     public function __construct(EasySms $easySms)
     {
@@ -42,15 +38,10 @@ class Messenger
     /**
      * Send a message.
      *
-     * @param \Overtrue\EasySms\Contracts\PhoneNumberInterface $to
-     * @param \Overtrue\EasySms\Contracts\MessageInterface     $message
-     * @param array                                            $gateways
-     *
-     * @return array
-     *
-     * @throws \Overtrue\EasySms\Exceptions\NoGatewayAvailableException
+     * @throws InvalidArgumentException
+     * @throws NoGatewayAvailableException
      */
-    public function send(PhoneNumberInterface $to, MessageInterface $message, array $gateways = [])
+    public function send(PhoneNumberInterface $to, MessageInterface $message, array $gateways = []): array
     {
         $results = [];
         $isSuccessful = false;
@@ -60,30 +51,23 @@ class Messenger
                 $results[$gateway] = [
                     'gateway' => $gateway,
                     'status' => self::STATUS_SUCCESS,
-                    'template'  => $message->getTemplate($this->easySms->gateway($gateway)),
+                    'template' => $message->getTemplate($this->easySms->gateway($gateway)),
                     'result' => $this->easySms->gateway($gateway)->send($to, $message, $config),
                 ];
                 $isSuccessful = true;
 
                 break;
-            } catch (\Exception $e) {
+            } catch (\Exception|\Throwable $e) {
                 $results[$gateway] = [
                     'gateway' => $gateway,
                     'status' => self::STATUS_FAILURE,
-                    'template'  => $message->getTemplate($this->easySms->gateway($gateway)),
-                    'exception' => $e,
-                ];
-            } catch (\Throwable $e) {
-                $results[$gateway] = [
-                    'gateway' => $gateway,
-                    'status' => self::STATUS_FAILURE,
-                    'template'  => $message->getTemplate($this->easySms->gateway($gateway)),
+                    'template' => $message->getTemplate($this->easySms->gateway($gateway)),
                     'exception' => $e,
                 ];
             }
         }
 
-        if (!$isSuccessful) {
+        if (! $isSuccessful) {
             throw new NoGatewayAvailableException($results);
         }
 

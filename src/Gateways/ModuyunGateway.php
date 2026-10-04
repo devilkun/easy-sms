@@ -26,16 +26,12 @@ class ModuyunGateway extends Gateway
 {
     use HasHttpRequest;
 
-    const ENDPOINT_URL = 'https://live.moduyun.com/sms/v2/sendsinglesms';
+    public const ENDPOINT_URL = 'https://live.moduyun.com/sms/v2/sendsinglesms';
 
     /**
-     * @param \Overtrue\EasySms\Contracts\PhoneNumberInterface $to
-     * @param \Overtrue\EasySms\Contracts\MessageInterface     $message
-     * @param \Overtrue\EasySms\Support\Config                 $config
-     *
      * @return array
      *
-     * @throws \Overtrue\EasySms\Exceptions\GatewayErrorException ;
+     * @throws GatewayErrorException ;
      */
     public function send(PhoneNumberInterface $to, MessageInterface $message, Config $config)
     {
@@ -61,7 +57,7 @@ class ModuyunGateway extends Gateway
 
         $result = $this->postJson($this->getEndpointUrl($urlParams), $params);
         $result = is_string($result) ? json_decode($result, true) : $result;
-        if (0 != $result['result']) {
+        if ($result['result'] != 0) {
             throw new GatewayErrorException($result['errmsg'], $result['result'], $result);
         }
 
@@ -69,21 +65,19 @@ class ModuyunGateway extends Gateway
     }
 
     /**
-     * @param array $params
-     *
+     * @param  array  $params
      * @return string
      */
     protected function getEndpointUrl($params)
     {
-        return self::ENDPOINT_URL . '?' . http_build_query($params);
+        return self::ENDPOINT_URL.'?'.http_build_query($params);
     }
 
     /**
      * Generate Sign.
      *
-     * @param array  $params
-     * @param string $random
-     *
+     * @param  array  $params
+     * @param  string  $random
      * @return string
      */
     protected function generateSign($params, $random)

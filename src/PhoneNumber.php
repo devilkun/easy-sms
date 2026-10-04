@@ -11,81 +11,119 @@
 
 namespace Overtrue\EasySms;
 
+use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumberFormat;
+use libphonenumber\PhoneNumberUtil;
+
 /**
  * Class PhoneNumberInterface.
  *
  * @author overtrue <i@overtrue.me>
  */
-class PhoneNumber implements \Overtrue\EasySms\Contracts\PhoneNumberInterface
+class PhoneNumber implements Contracts\PhoneNumberInterface
 {
-    /**
-     * @var int
-     */
-    protected $number;
+    protected int|string $number;
 
-    /**
-     * @var int
-     */
-    protected $IDDCode;
+    protected ?int $IDDCode;
+
+    protected ?\libphonenumber\PhoneNumber $phoneNumberObject = null;
+
+    protected PhoneNumberUtil $phoneUtil;
 
     /**
      * PhoneNumberInterface constructor.
-     *
-     * @param int    $numberWithoutIDDCode
-     * @param string $IDDCode
      */
-    public function __construct($numberWithoutIDDCode, $IDDCode = null)
+    public function __construct(int|string $numberWithoutIDDCode, ?string $IDDCode = null)
     {
-        $this->number = $numberWithoutIDDCode;
-        $this->IDDCode = $IDDCode ? intval(ltrim($IDDCode, '+0')) : null;
+        $this->phoneUtil = PhoneNumberUtil::getInstance();
+        $numberStr = (string) $numberWithoutIDDCode;
+        $parsedIDDCode = $IDDCode ? intval(ltrim($IDDCode, '+0')) : null;
+
+        // Try to parse using libphonenumber
+        try {
+            if ($parsedIDDCode !== null) {
+                // If IDD code is provided, construct the phone number directly
+                $this->phoneNumberObject = new \libphonenumber\PhoneNumber;
+                $this->phoneNumberObject->setCountryCode($parsedIDDCode);
+                $this->phoneNumberObject->setNationalNumber($numberStr);
+
+                $this->IDDCode = $parsedIDDCode;
+                $this->number = is_numeric($numberWithoutIDDCode) && is_int($numberWithoutIDDCode) ? $numberWithoutIDDCode : $numberStr;
+            } elseif (str_starts_with($numberStr, '+')) {
+                // International format with +
+                $this->phoneNumberObject = $this->phoneUtil->parse($numberStr, null);
+                $this->IDDCode = $this->phoneNumberObject->getCountryCode();
+                $this->number = $this->phoneNumberObject->getNationalNumber();
+            } elseif (str_starts_with($numberStr, '00')) {
+                // International format with 00 prefix - need to provide a region for parsing
+                // Try parsing with common regions
+                $this->phoneNumberObject = $this->phoneUtil->parse($numberStr, 'CN');
+                $this->IDDCode = $this->phoneNumberObject->getCountryCode();
+                $this->number = $this->phoneNumberObject->getNationalNumber();
+            } else {
+                // No IDD code provided and no international prefix
+                // Keep the number as-is without parsing (backward compatibility)
+                $this->number = $numberWithoutIDDCode;
+                $this->IDDCode = null;
+
+                // But still try to parse for validation purposes
+                try {
+                    $this->phoneNumberObject = $this->phoneUtil->parse($numberStr, 'CN');
+                } catch (NumberParseException $e) {
+                    // Ignore parsing errors for backward compatibility
+                }
+            }
+        } catch (NumberParseException $e) {
+            // If parsing fails, fall back to storing the raw values
+            $this->number = $numberWithoutIDDCode;
+            $this->IDDCode = $parsedIDDCode;
+        }
     }
 
     /**
      * 86.
-     *
-     * @return int
      */
-    public function getIDDCode()
+    public function getIDDCode(): ?int
     {
         return $this->IDDCode;
     }
 
     /**
      * 18888888888.
-     *
-     * @return int
      */
-    public function getNumber()
+    public function getNumber(): int|string
     {
         return $this->number;
     }
 
     /**
      * +8618888888888.
-     *
-     * @return string
      */
-    public function getUniversalNumber()
+    public function getUniversalNumber(): string
     {
+        if ($this->phoneNumberObject !== null && $this->IDDCode !== null && $this->phoneUtil->isValidNumber($this->phoneNumberObject)) {
+            return $this->phoneUtil->format($this->phoneNumberObject, PhoneNumberFormat::E164);
+        }
+
         return $this->getPrefixedIDDCode('+').$this->number;
     }
 
     /**
      * 008618888888888.
-     *
-     * @return string
      */
-    public function getZeroPrefixedNumber()
+    public function getZeroPrefixedNumber(): string
     {
+        if ($this->phoneNumberObject !== null && $this->IDDCode !== null) {
+            $e164 = $this->phoneUtil->format($this->phoneNumberObject, PhoneNumberFormat::E164);
+
+            // Convert +XX to 00XX
+            return '00'.substr($e164, 1);
+        }
+
         return $this->getPrefixedIDDCode('00').$this->number;
     }
 
-    /**
-     * @param string $prefix
-     *
-     * @return string|null
-     */
-    public function getPrefixedIDDCode($prefix)
+    public function getPrefixedIDDCode(string $prefix): ?string
     {
         return $this->IDDCode ? $prefix.$this->IDDCode : null;
     }
@@ -116,10 +154,8 @@ class PhoneNumber implements \Overtrue\EasySms\Contracts\PhoneNumberInterface
 
     /**
      * Check if the phone number belongs to chinese mainland.
-     *
-     * @return bool
      */
-    public function inChineseMainland()
+    public function inChineseMainland(): bool
     {
         return empty($this->IDDCode) || $this->IDDCode === 86;
     }

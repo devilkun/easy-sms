@@ -16,48 +16,32 @@ namespace Overtrue\EasySms\Contracts;
  */
 interface MessageInterface
 {
-    const TEXT_MESSAGE = 'text';
+    public const TEXT_MESSAGE = 'text';
 
-    const VOICE_MESSAGE = 'voice';
+    public const VOICE_MESSAGE = 'voice';
 
     /**
      * Return the message type.
-     *
-     * @return string
      */
-    public function getMessageType();
+    public function getMessageType(): string;
 
     /**
      * Return message content.
-     *
-     * @param \Overtrue\EasySms\Contracts\GatewayInterface|null $gateway
-     *
-     * @return string
      */
-    public function getContent(GatewayInterface $gateway = null);
+    public function getContent(?GatewayInterface $gateway = null): ?string;
 
     /**
      * Return the template id of message.
-     *
-     * @param \Overtrue\EasySms\Contracts\GatewayInterface|null $gateway
-     *
-     * @return string
      */
-    public function getTemplate(GatewayInterface $gateway = null);
+    public function getTemplate(?GatewayInterface $gateway = null): ?string;
 
     /**
      * Return the template data of message.
-     *
-     * @param \Overtrue\EasySms\Contracts\GatewayInterface|null $gateway
-     *
-     * @return array
      */
-    public function getData(GatewayInterface $gateway = null);
+    public function getData(?GatewayInterface $gateway = null): array;
 
     /**
      * Return message supported gateways.
-     *
-     * @return array
      */
-    public function getGateways();
+    public function getGateways(): array;
 }

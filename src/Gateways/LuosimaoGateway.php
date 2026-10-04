@@ -26,20 +26,16 @@ class LuosimaoGateway extends Gateway
 {
     use HasHttpRequest;
 
-    const ENDPOINT_TEMPLATE = 'https://%s.luosimao.com/%s/%s.%s';
+    public const ENDPOINT_TEMPLATE = 'https://%s.luosimao.com/%s/%s.%s';
 
-    const ENDPOINT_VERSION = 'v1';
+    public const ENDPOINT_VERSION = 'v1';
 
-    const ENDPOINT_FORMAT = 'json';
+    public const ENDPOINT_FORMAT = 'json';
 
     /**
-     * @param \Overtrue\EasySms\Contracts\PhoneNumberInterface $to
-     * @param \Overtrue\EasySms\Contracts\MessageInterface     $message
-     * @param \Overtrue\EasySms\Support\Config                 $config
-     *
      * @return array
      *
-     * @throws \Overtrue\EasySms\Exceptions\GatewayErrorException ;
+     * @throws GatewayErrorException ;
      */
     public function send(PhoneNumberInterface $to, MessageInterface $message, Config $config)
     {
@@ -62,9 +58,8 @@ class LuosimaoGateway extends Gateway
     /**
      * Build endpoint url.
      *
-     * @param string $type
-     * @param string $function
-     *
+     * @param  string  $type
+     * @param  string  $function
      * @return string
      */
     protected function buildEndpoint($type, $function)

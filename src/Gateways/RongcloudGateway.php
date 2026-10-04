@@ -29,24 +29,20 @@ class RongcloudGateway extends Gateway
 {
     use HasHttpRequest;
 
-    const ENDPOINT_TEMPLATE = 'http://api.sms.ronghub.com/%s.%s';
+    public const ENDPOINT_TEMPLATE = 'http://api.sms.ronghub.com/%s.%s';
 
-    const ENDPOINT_ACTION = 'sendCode';
+    public const ENDPOINT_ACTION = 'sendCode';
 
-    const ENDPOINT_FORMAT = 'json';
+    public const ENDPOINT_FORMAT = 'json';
 
-    const ENDPOINT_REGION = '86';  // 中国区，目前只支持此国别
+    public const ENDPOINT_REGION = '86';  // 中国区，目前只支持此国别
 
-    const SUCCESS_CODE = 200;
+    public const SUCCESS_CODE = 200;
 
     /**
-     * @param \Overtrue\EasySms\Contracts\PhoneNumberInterface $to
-     * @param \Overtrue\EasySms\Contracts\MessageInterface     $message
-     * @param \Overtrue\EasySms\Support\Config                 $config
-     *
      * @return array
      *
-     * @throws \Overtrue\EasySms\Exceptions\GatewayErrorException ;
+     * @throws GatewayErrorException ;
      */
     public function send(PhoneNumberInterface $to, MessageInterface $message, Config $config)
     {
@@ -57,7 +53,7 @@ class RongcloudGateway extends Gateway
         $headers = [
             'Nonce' => uniqid(),
             'App-Key' => $config->get('app_key'),
-            'Timestamp' => time(),
+            'Timestamp' => (string) time(),
         ];
         $headers['Signature'] = $this->generateSign($headers, $config);
 
@@ -71,8 +67,8 @@ class RongcloudGateway extends Gateway
 
                 break;
             case 'verifyCode':
-                if (!array_key_exists('code', $data)
-                    or !array_key_exists('sessionId', $data)) {
+                if (! array_key_exists('code', $data)
+                    or ! array_key_exists('sessionId', $data)) {
                     throw new GatewayErrorException('"code" or "sessionId" is not set', 0);
                 }
                 $params = [
@@ -86,7 +82,7 @@ class RongcloudGateway extends Gateway
                     'mobile' => $to->getNumber(),
                     'region' => self::ENDPOINT_REGION,
                     'templateId' => $message->getTemplate($this),
-                    ];
+                ];
                 $params = array_merge($params, $data);
 
                 break;
@@ -97,7 +93,7 @@ class RongcloudGateway extends Gateway
         try {
             $result = $this->post($endpoint, $params, $headers);
 
-            if (self::SUCCESS_CODE !== $result['code']) {
+            if ($result['code'] !== self::SUCCESS_CODE) {
                 throw new GatewayErrorException($result['errorMessage'], $result['code'], $result);
             }
         } catch (ClientException $e) {
@@ -110,9 +106,7 @@ class RongcloudGateway extends Gateway
     /**
      * Generate Sign.
      *
-     * @param array                            $params
-     * @param \Overtrue\EasySms\Support\Config $config
-     *
+     * @param  array  $params
      * @return string
      */
     protected function generateSign($params, Config $config)
@@ -123,8 +117,7 @@ class RongcloudGateway extends Gateway
     /**
      * Build endpoint url.
      *
-     * @param string $action
-     *
+     * @param  string  $action
      * @return string
      */
     protected function buildEndpoint($action)

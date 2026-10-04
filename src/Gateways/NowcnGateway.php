@@ -12,16 +12,16 @@ class NowcnGateway extends Gateway
 {
     use HasHttpRequest;
 
-    const ENDPOINT_URL = 'http://ad1200.now.net.cn:2003/sms/sendSMS';
+    public const ENDPOINT_URL = 'http://ad1200.now.net.cn:2003/sms/sendSMS';
 
-    const SUCCESS_CODE = 0;
+    public const SUCCESS_CODE = 0;
 
     public function send(PhoneNumberInterface $to, MessageInterface $message, Config $config)
     {
-        if (!$config->get('key')) {
-            throw new GatewayErrorException("key not found", -2, []);
+        if (! $config->get('key')) {
+            throw new GatewayErrorException('key not found', -2, []);
         }
-        $params=[
+        $params = [
             'mobile' => $to->getNumber(),
             'content' => $message->getContent($this),
             'userId' => $config->get('key'),
@@ -30,9 +30,10 @@ class NowcnGateway extends Gateway
         ];
         $result = $this->get(self::ENDPOINT_URL, $params);
         $result = is_string($result) ? json_decode($result, true) : $result;
-        if (self::SUCCESS_CODE != $result['code']) {
+        if ($result['code'] != self::SUCCESS_CODE) {
             throw new GatewayErrorException($result['msg'], $result['code'], $result);
         }
+
         return $result;
     }
 }

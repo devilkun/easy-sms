@@ -1,9 +1,8 @@
 <h1 align="center">Easy SMS</h1>
 
-<p align="center">:calling: 一款满足你的多种发送需求的短信发送组件</p>
+<p align="center">:calling: 一款多渠道的短信发送组件</p>
 
 <p align="center">
-<a href="https://travis-ci.org/overtrue/easy-sms"><img src="https://travis-ci.org/overtrue/easy-sms.svg?branch=master" alt="Build Status"></a>
 <a href="https://packagist.org/packages/overtrue/easy-sms"><img src="https://poser.pugx.org/overtrue/easy-sms/v/stable.svg" alt="Latest Stable Version"></a>
 <a href="https://packagist.org/packages/overtrue/easy-sms"><img src="https://poser.pugx.org/overtrue/easy-sms/v/unstable.svg" alt="Latest Unstable Version"></a>
 <a href="https://scrutinizer-ci.com/g/overtrue/easy-sms/?branch=master"><img src="https://scrutinizer-ci.com/g/overtrue/easy-sms/badges/coverage.png?b=master" alt="Code Coverage"></a>
@@ -14,7 +13,6 @@
 <p align="center">
 <a href="https://github.com/sponsors/overtrue"><img src="https://github.com/overtrue/overtrue/blob/master/sponsor-me-button-s.svg?raw=true" alt="Sponsor me" style="max-width: 100%;"></a>
 </p>
-
 
 ## 特点
 
@@ -45,7 +43,6 @@
 - [创蓝云智](https://www.chuanglan.com/)
 - [融云](http://www.rongcloud.cn)
 - [天毅无线](http://www.85hu.com/)
-- [阿凡达数据](http://www.avatardata.cn/)
 - [华为云](https://www.huaweicloud.com/product/msgsms.html)
 - [网易云信](https://yunxin.163.com/sms)
 - [云之讯](https://www.ucpaas.com/index.html)
@@ -60,22 +57,29 @@
 - [天瑞云](http://cms.tinree.com/)
 - [时代互联](https://www.now.cn/)
 - [火山引擎](https://console.volcengine.com/sms/)
+- [移动云MAS（黑名单模式）](https://mas.10086.cn)
+- [电信天翼云](https://www.ctyun.cn/document/10020426/10021544)
+- [微趣云](https://sms.weiqucloud.com/)
+- [秒信短信平台](http://www.51miaoxin.com)
 
 ## 环境需求
 
-- PHP >= 5.6
+- PHP >= 8.4（已在 PHP 8.5 上验证）
+- [guzzlehttp/guzzle](https://github.com/guzzle/guzzle) `^7.0 || ^8.0`
+
+> Guzzle 8 起 `headers` 选项的值必须是字符串（或非空字符串数组）。在网关配置的 `options.headers` 里传入数字、布尔值或 `null` 时会触发 `GuzzleHttp\Exception\InvalidArgumentException`，请先自行转成字符串。
 
 ## 安装
 
 ```shell
-$ composer require "overtrue/easy-sms"
+composer require "overtrue/easy-sms"
 ```
 
 **For Laravel notification**
 
 如果你喜欢使用 [Laravel Notification](https://laravel.com/docs/5.8/notifications), 可以考虑直接使用朋友封装的拓展包：
 
-https://github.com/yl/easysms-notification-channel
+<https://github.com/yl/easysms-notification-channel>
 
 ## 使用
 
@@ -203,6 +207,7 @@ $easySms->send(13188888888, [
 ## 返回值
 
 由于使用多网关发送，所以返回值为一个数组，结构如下：
+
 ```php
 [
     'yunpian' => [
@@ -393,6 +398,33 @@ $easySms->send($phone_number, [
 ]);
 ```
 
+
+### [阿里云短信认证](https://help.aliyun.com/zh/pnvs/getting-started/sms-authentication-service-novice-guide)
+
+短信内容使用 `template` + `data`
+
+```php
+    'aliyundypns' => [
+        'access_key_id' => '',
+        'access_key_secret' => '',
+        'sign_name' => '', // 不可自定义，可选：速通互联验证码、云渚科技验证服务等
+    ],
+```
+
+发送示例：
+
+```php
+$easySms = new EasySms($config);
+
+$easySms->send('18888888888', [
+    'template' => '100001', // 模板ID，详见：https://dypns.console.aliyun.com/smsCertParamsConfig
+    'data' => [
+        "code" => 1234,
+        "min" => 5, // 有效时间（分钟）
+    ],
+]);
+```
+
 ### [云片](https://www.yunpian.com)
 
 短信内容使用 `content`
@@ -472,6 +504,7 @@ $easySms->send($phone_number, [
         'timestamp' => false, // 是否启用时间戳
     ],
 ```
+
 ### [百度云](https://cloud.baidu.com/)
 
 短信内容使用 `template` + `data`
@@ -531,9 +564,10 @@ $easySms->send($phone_number, [
         'account' => '',
         'password' => '',
         'needstatus' => false,
-        'channel' => \Overtrue\EasySms\Gateways\ChuanglanV1Gateway::CHANNEL_NORMAL_CODE,
+        'channel' => \Overtrue\EasySms\Gateways\Chuanglanv1Gateway::CHANNEL_NORMAL_CODE,
     ],
 ```
+
 发送示例：
 
 ```php
@@ -549,9 +583,10 @@ $easySms->send(18888888888, [
         'account' => '',
         'password' => '',
         'needstatus' => false,
-        'channel' => \Overtrue\EasySms\Gateways\ChuanglanV1Gateway::CHANNEL_VARIABLE_CODE,
+        'channel' => \Overtrue\EasySms\Gateways\Chuanglanv1Gateway::CHANNEL_VARIABLE_CODE,
     ],
 ```
+
 发送示例：
 
 ```php
@@ -610,7 +645,6 @@ $easySms->send(18888888888, [
     ],
 ```
 
-
 ### [腾讯云 SMS](https://cloud.tencent.com/product/sms)
 
 短信内容使用 `template` + `data`
@@ -633,16 +667,6 @@ $easySms->send(18888888888, [
         "a", 'b', 'c', 'd', //按占位顺序给值
     ],
 ]);
-```
-
-### [阿凡达数据](http://www.avatardata.cn/)
-
-短信内容使用 `template` + `data`
-
-```php
-    'avatardata' => [
-        'app_key' => '', // APP KEY
-    ],
 ```
 
 ### [华为云 SMS](https://www.huaweicloud.com/product/msgsms.html)
@@ -710,6 +734,18 @@ $easySms->send(18888888888, [
 ]);
 ```
 
+通知模板短信
+
+```php
+$easySms->send(18888888888, [
+    'template' => 'templateid',    // 模板编号(由客户顾问配置之后告知开发者)
+    'data' => [
+        'action' => 'sendTemplate', // 默认为 `sendCode`，校验短信验证码使用 `verifyCode`
+        'params' => [1,2,3], //短信参数列表，用于依次填充模板
+    ],
+]);
+```
+
 ### [云之讯](https://www.ucpaas.com/index.html)
 
 短信内容使用 `template` + `data`
@@ -770,7 +806,9 @@ $easySms->send(18888888888, [
     ],
 ]);
 ```
+
 ### [Ucloud](https://www.ucloud.cn/)
+
 短信使用 `template` + `data`
 
 ```php
@@ -793,8 +831,8 @@ $easySms->send(18888888888, [
 
 ```
 
-
 ### [短信宝](http://www.smsbao.com/)
+
 短信使用 `content`
 
 ```php
@@ -812,6 +850,7 @@ $easySms->send(18888888888, [
 ```
 
 ### [摩杜云](https://www.moduyun.com/)
+
 短信使用 `template` + `data`
 
 ```php
@@ -939,6 +978,7 @@ $easySms->send(18888888888, [
 ```
 
 发送示例：
+
 ```php
 $easySms->send(18888888888, [
     'content'  => '您的验证码为: 6379',
@@ -971,6 +1011,7 @@ $easySms->send(18888888888, [
 ```
 
 发送示例2：
+
 ```php
 $easySms->send(18888888888, [
     'template' => 'SMS_123456', // 模板ID
@@ -983,6 +1024,114 @@ $easySms->send(18888888888, [
 ]);
 ```
 
+### [移动云MAS（黑名单模式）](https://mas.10086.cn/)
+
+短信内容使用 `template` + `data`
+
+```php
+    'yidongmasblack' => [
+        'ecName' => '', // 机构名称
+        'secretKey' => '', // 密钥
+        'apId' => '', // 应用ID
+        'sign' => '', // 签名
+        'addSerial' => '', // 通道号默认空
+    ],
+```
+
+发送示例：
+
+```php
+$easySms->send(18888888888, [
+    'content'  => '您的验证码为: 6379',
+]);
+```
+
+### [电信天翼云](https://www.ctyun.cn/)
+
+短信使用 `content`
+
+```php
+  'ctyun' => [
+        'access_key'  => '',    //用户access
+        'secret_key'   => '',    //开发密钥secret
+        'sign'  => '验证码测试',    // 短信下发签名,
+    ],
+```
+
+发送示例：
+
+```php
+$easySms->send(18888888888, [
+    'content' => $content,
+    'template' => 'SMS64124870510', // 模板ID
+    'data' => [
+        "code" => 123456,
+    ],
+]);
+```
+
+### [微趣云](https://sms.weiqucloud.com/)
+
+短信使用 `content`
+
+```php
+  'weiqucloud' => [
+        'userId'  => '',    // 服务商会提供 
+        'account'   => '',    //服务商会提供
+        'password'  => '',    // 服务商会提供,
+    ],
+```
+
+发送示例：
+
+```php
+$easySms->send(18888888888, [
+    'content'  =>"【已备案签名】您的验证码是 xx。",
+]);
+```
+
+### [秒信短信平台](http://www.51miaoxin.com)
+
+短信使用 `content` 或 `template`，根据消息内容自动选择发送方式：
+
+1. 设置 `template`（模板短信）→ 走模板接口（`/sms/sendTemplateParamd`）
+2. 未设置 `template` 但配置了 `signature_id`（固定签名）→ 走固定签名接口（`/sms/sendFixedSignature`）
+3. 未设置 `template` 且未配置 `signature_id`（自定义内容）→ 走发送接口（`/sms/send`）
+
+```php
+  'miaoxin' => [
+        'account'  => '',    // 服务商提供的账号
+        'secret'   => '',    // 服务商提供的密钥，用于生成 token 签名
+        // 'signature_id' => '',   // 可选，固定签名 ID（配置后自定义内容走固定签名接口）
+        // 'ref' => '',            // 可选，客户自定义编号，用于对账
+        // 'ext' => '',            // 可选，分机号
+        // 'schedule' => '',       // 可选，定时发送时间，模板短信专用
+        // 'endpoint' => '',       // 可选，接口地址覆盖，默认 http://www.51miaoxin.com
+    ],
+```
+
+发送示例（自定义内容）：
+
+```php
+$easySms->send(18888888888, [
+    'content'  => '【秒信】您的验证码是 6379，5 分钟内有效。',
+]);
+```
+
+发送示例（模板短信）：
+
+```php
+$easySms->send(18888888888, [
+    'template' => '模板ID',
+    'data' => [
+        '1234', // 对应模板的 param1、param2…按顺序填充，最多 8 个
+        '张三',
+    ],
+]);
+```
+
+> 自定义内容时如需固定签名，在配置中加上 `signature_id` 即可自动切换到固定签名发送方式。
+
 ## :heart: 支持我
 
 [![Sponsor me](https://github.com/overtrue/overtrue/blob/master/sponsor-me.svg?raw=true)](https://github.com/sponsors/overtrue)
@@ -994,13 +1143,6 @@ $easySms->send(18888888888, [
 Many thanks to Jetbrains for kindly providing a license for me to work on this and other open-source projects.
 
 [![](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)](https://www.jetbrains.com/?from=https://github.com/overtrue)
-
-
-## PHP 扩展包开发
-
-> 想知道如何从零开始构建 PHP 扩展包？
->
-> 请关注我的实战课程，我会在此课程中分享一些扩展开发经验 —— [《PHP 扩展包实战教程 - 从入门到发布》](https://learnku.com/courses/creating-package)
 
 ## License
 

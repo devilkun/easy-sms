@@ -26,22 +26,18 @@ class Ue35Gateway extends Gateway
 {
     use HasHttpRequest;
 
-    const ENDPOINT_HOST = 'sms.ue35.cn';
+    public const ENDPOINT_HOST = 'sms.ue35.net:8443';
 
-    const ENDPOINT_URI = '/sms/interface/sendmess.htm';
+    public const ENDPOINT_URI = '/sms/interface/sendmess.htm';
 
-    const SUCCESS_CODE = 1;
+    public const SUCCESS_CODE = 1;
 
     /**
      * Send message.
      *
-     * @param \Overtrue\EasySms\Contracts\PhoneNumberInterface $to
-     * @param \Overtrue\EasySms\Contracts\MessageInterface     $message
-     * @param \Overtrue\EasySms\Support\Config                 $config
-     *
      * @return array
      *
-     * @throws \Overtrue\EasySms\Exceptions\GatewayErrorException ;
+     * @throws GatewayErrorException ;
      */
     public function send(PhoneNumberInterface $to, MessageInterface $message, Config $config)
     {
@@ -63,7 +59,7 @@ class Ue35Gateway extends Gateway
             $result = json_decode(json_encode(simplexml_load_string($result)), true);
         }
 
-        if (self::SUCCESS_CODE != $result['errorcode']) {
+        if ($result['errorcode'] != self::SUCCESS_CODE) {
             throw new GatewayErrorException($result['message'], $result['errorcode'], $result);
         }
 
@@ -72,6 +68,6 @@ class Ue35Gateway extends Gateway
 
     public static function getEndpointUri()
     {
-        return 'http://'.static::ENDPOINT_HOST.static::ENDPOINT_URI;
+        return 'https://'.static::ENDPOINT_HOST.static::ENDPOINT_URI;
     }
 }

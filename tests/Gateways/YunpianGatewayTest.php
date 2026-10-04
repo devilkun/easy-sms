@@ -20,7 +20,7 @@ use Overtrue\EasySms\Tests\TestCase;
 
 class YunpianGatewayTest extends TestCase
 {
-    public function testSend()
+    public function test_send()
     {
         $config = [
             'api_key' => 'mock-api-key',
@@ -33,12 +33,12 @@ class YunpianGatewayTest extends TestCase
                 'mobile' => '18188888888',
                 'text' => '【overtrue】This is a test message.',
             ],
-            'exceptions' => false,
+            'http_errors' => false,
         ])->andReturn([
             'code' => 0,
             'msg' => '发送成功',
-            'count' => 1, //成功发送的短信计费条数
-            'fee' => 0.05,    //扣费条数，70个字一条，超出70个字时按每67字一条计
+            'count' => 1, // 成功发送的短信计费条数
+            'fee' => 0.05,    // 扣费条数，70个字一条，超出70个字时按每67字一条计
             'unit' => 'RMB',  // 计费单位
             'mobile' => '18188888888', // 发送手机号
             'sid' => 3310228982,   // 短信ID
@@ -52,8 +52,8 @@ class YunpianGatewayTest extends TestCase
         $this->assertSame([
             'code' => 0,
             'msg' => '发送成功',
-            'count' => 1, //成功发送的短信计费条数
-            'fee' => 0.05,    //扣费条数，70个字一条，超出70个字时按每67字一条计
+            'count' => 1, // 成功发送的短信计费条数
+            'fee' => 0.05,    // 扣费条数，70个字一条，超出70个字时按每67字一条计
             'unit' => 'RMB',  // 计费单位
             'mobile' => '18188888888', // 发送手机号
             'sid' => 3310228982,   // 短信ID
@@ -66,7 +66,7 @@ class YunpianGatewayTest extends TestCase
         $gateway->send(new PhoneNumber(18188888888), $message, $config);
     }
 
-    public function testDefaultSignature()
+    public function test_default_signature()
     {
         $config = [
             'api_key' => 'mock-api-key',
@@ -75,8 +75,8 @@ class YunpianGatewayTest extends TestCase
         $response = [
             'code' => 0,
             'msg' => '发送成功',
-            'count' => 1, //成功发送的短信计费条数
-            'fee' => 0.05,    //扣费条数，70个字一条，超出70个字时按每67字一条计
+            'count' => 1, // 成功发送的短信计费条数
+            'fee' => 0.05,    // 扣费条数，70个字一条，超出70个字时按每67字一条计
             'unit' => 'RMB',  // 计费单位
             'mobile' => '18188888888', // 发送手机号
             'sid' => 3310228982,   // 短信ID
@@ -90,7 +90,7 @@ class YunpianGatewayTest extends TestCase
                 'mobile' => '18188888888',
                 'text' => '【测试】This is a 【test】 message.',
             ],
-            'exceptions' => false,
+            'http_errors' => false,
         ])->andReturn($response);
 
         $this->assertSame($response, $gateway->send(new PhoneNumber(18188888888), new Message(['content' => 'This is a 【test】 message.']), $config));
@@ -102,7 +102,7 @@ class YunpianGatewayTest extends TestCase
                 'mobile' => '18188888888',
                 'text' => '【已经存在】This is a 【test】 message.',
             ],
-            'exceptions' => false,
+            'http_errors' => false,
         ])->andReturn($response);
 
         $this->assertSame($response, $gateway->send(new PhoneNumber(18188888888), new Message(['content' => '【已经存在】This is a 【test】 message.']), $config));

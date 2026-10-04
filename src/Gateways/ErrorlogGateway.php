@@ -21,13 +21,9 @@ use Overtrue\EasySms\Support\Config;
 class ErrorlogGateway extends Gateway
 {
     /**
-     * @param \Overtrue\EasySms\Contracts\PhoneNumberInterface $to
-     * @param \Overtrue\EasySms\Contracts\MessageInterface     $message
-     * @param \Overtrue\EasySms\Support\Config                 $config
-     *
      * @return array
      */
-    public function send(PhoneNumberInterface $to, MessageInterface $message, Config $config)
+    public function send(PhoneNumberInterface|array $to, MessageInterface $message, Config $config)
     {
         if (is_array($to)) {
             $to = implode(',', $to);

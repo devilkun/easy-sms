@@ -23,13 +23,13 @@ use Overtrue\EasySms\Tests\TestCase;
  */
 class UcloudGatewayTest extends TestCase
 {
-    public function testSend()
+    public function test_send()
     {
         $config = [
-            'private_key' => '', //私钥
-            'public_key' => '', //公钥
-            'sig_content' => '', //签名
-            'project_id' => '', //默认不填，子账号才需要填
+            'private_key' => '', // 私钥
+            'public_key' => '', // 公钥
+            'sig_content' => '', // 签名
+            'project_id' => '', // 默认不填，子账号才需要填
         ];
 
         $gateway = \Mockery::mock(UcloudGateway::class.'[request]', [$config])->shouldAllowMockingProtectedMethods();
@@ -37,7 +37,7 @@ class UcloudGatewayTest extends TestCase
         $gateway->shouldReceive('request')->with(
             'get',
             \Mockery::on(function ($api) {
-                return 0 === strpos($api, UcloudGateway::ENDPOINT_URL);
+                return strpos($api, UcloudGateway::ENDPOINT_URL) === 0;
             }),
             \Mockery::on(function ($params) {
                 return true;
@@ -54,7 +54,7 @@ class UcloudGatewayTest extends TestCase
             'template' => '',
             'data' => [
                 'code' => '', // 如果是多个参数可以用数组
-                'mobiles' => '', //同时发送多个手机也可以用数组来,[1111111,11111]
+                'mobiles' => '', // 同时发送多个手机也可以用数组来,[1111111,11111]
             ],
         ]);
         $config = new Config($config);
@@ -69,46 +69,56 @@ class UcloudGatewayTest extends TestCase
 
         $gateway->send(new PhoneNumber(18888888888), $message, $config);
     }
-    
-    public function testSignContent()
+
+    public function test_sign_content()
     {
         $defaultSigContent = 'default_sig_content';
-        
+
         $dataSigContent = 'data_sig_content';
-        
+
         $config = [
-            'private_key' => '', //私钥
-            'public_key' => '', //公钥
-            'sig_content' => $defaultSigContent, //签名
-            'project_id' => '',
+            'private_key' => '', // 私钥
+            'public_key' => '', // 公钥
+            'sig_content' => $defaultSigContent, // 签名
+            'project_id' => '', // 默认不填，子账号才需要填
         ];
-        $easySms = new EasySms($config);
-        
-        $phoneNumber = new PhoneNumber('18888888888');
-        $gateway = $easySms->gateway('ucloud');
-        
-        $reflectionMethod = new \ReflectionMethod(get_class($gateway), 'buildParams');
-        $reflectionMethod->setAccessible(true);
-        //验证指定签名
+
+        $gateway = \Mockery::mock(UcloudGateway::class.'[request]', [$config])->shouldAllowMockingProtectedMethods();
+
+        $gateway->shouldReceive('request')->with(
+            'get',
+            \Mockery::on(function ($api) {
+                return strpos($api, UcloudGateway::ENDPOINT_URL) === 0;
+            }),
+            \Mockery::on(function ($params) {
+                return true;
+            })
+        )
+            ->andReturn([
+                'RetCode' => UcloudGateway::SUCCESS_CODE,
+            ], [
+                'RetCode' => 170,
+                'Message' => 'Missing signature',
+            ])->times(2);
+
         $message = new Message([
             'template' => '',
             'data' => [
                 'code' => '', // 如果是多个参数可以用数组
-                'mobiles' => '', //同时发送多个手机也可以用数组来,[1111111,11111]
-                'sig_content'=>$dataSigContent
+                'mobiles' => '', // 同时发送多个手机也可以用数组来,[1111111,11111]
+                'sig_content' => $dataSigContent,
             ],
         ]);
-        $result = $reflectionMethod->invokeArgs($gateway, [$phoneNumber, $message, $easySms->getConfig()]);
-        $this->assertSame($dataSigContent, $result['SigContent']);
-        //验证配置默认签名
-        $message = new Message([
-            'template' => '',
-            'data' => [
-                'code' => '', // 如果是多个参数可以用数组
-                'mobiles' => '', //同时发送多个手机也可以用数组来,[1111111,11111]
-            ],
-        ]);
-        $result = $reflectionMethod->invokeArgs($gateway, [$phoneNumber, $message, $easySms->getConfig()]);
-        $this->assertSame($defaultSigContent, $result['SigContent']);
+        $config = new Config($config);
+
+        $this->assertSame([
+            'RetCode' => UcloudGateway::SUCCESS_CODE,
+        ], $gateway->send(new PhoneNumber(18888888888), $message, $config));
+
+        $this->expectException(GatewayErrorException::class);
+        $this->expectExceptionCode(170);
+        $this->expectExceptionMessage('Missing signature');
+
+        $gateway->send(new PhoneNumber(18888888888), $message, $config);
     }
 }

@@ -20,7 +20,7 @@ use Overtrue\EasySms\Tests\TestCase;
 
 class MaapGatewayTest extends TestCase
 {
-    public function testSend()
+    public function test_send()
     {
         $config = [
             'cpcode' => 'mock-cpcode',
@@ -28,7 +28,7 @@ class MaapGatewayTest extends TestCase
             'excode' => 'mock-excode',
         ];
 
-        $gateway = \Mockery::mock(MaapGateway::class . '[postJson]', [$config])->shouldAllowMockingProtectedMethods();
+        $gateway = \Mockery::mock(MaapGateway::class.'[postJson]', [$config])->shouldAllowMockingProtectedMethods();
 
         $params = [
             'cpcode' => 'mock-cpcode',
@@ -37,7 +37,7 @@ class MaapGatewayTest extends TestCase
             'excode' => 'mock-excode',
             'templetid' => '123456',
         ];
-        $params['sign'] = md5($params['cpcode'] . $params['msg'] . $params['mobiles'] . $params['excode'] . $params['templetid'] . $config['key']);
+        $params['sign'] = md5($params['cpcode'].$params['msg'].$params['mobiles'].$params['excode'].$params['templetid'].$config['key']);
 
         $gateway->shouldReceive('postJson')
             ->with(MaapGateway::ENDPOINT_URL, $params)

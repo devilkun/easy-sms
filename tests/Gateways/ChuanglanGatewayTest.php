@@ -27,7 +27,7 @@ class ChuanglanGatewayTest extends TestCase
     /**
      * 发送验证码通道短信.
      */
-    public function testSendValidateCodeSMS()
+    public function test_send_validate_code_sms()
     {
         $config = [
             'account' => 'mock-account',
@@ -79,7 +79,7 @@ class ChuanglanGatewayTest extends TestCase
     /**
      * 发送营销通道短信.
      */
-    public function testSendPromotionSMS()
+    public function test_send_promotion_sms()
     {
         $config = [
             'account' => 'mock-account',
@@ -135,10 +135,9 @@ class ChuanglanGatewayTest extends TestCase
      *
      * @throws \ReflectionException
      */
-    public function testBuildEndpoint()
+    public function test_build_endpoint()
     {
         $method = new \ReflectionMethod(ChuanglanGateway::class, 'buildEndpoint');
-        $method->setAccessible(true);
         $gateway = \Mockery::mock(ChuanglanGateway::class.'[request]', [[]])->shouldAllowMockingProtectedMethods();
 
         // 验证码通道
@@ -159,10 +158,9 @@ class ChuanglanGatewayTest extends TestCase
      *
      * @throws \ReflectionException
      */
-    public function testGetChannel()
+    public function test_get_channel()
     {
         $method = new \ReflectionMethod(ChuanglanGateway::class, 'getChannel');
-        $method->setAccessible(true);
         $gateway = \Mockery::mock(ChuanglanGateway::class.'[request]', [[]])->shouldAllowMockingProtectedMethods();
 
         // 验证码通道
@@ -181,10 +179,9 @@ class ChuanglanGatewayTest extends TestCase
      *
      * @throws \ReflectionException
      */
-    public function testGetChannelException()
+    public function test_get_channel_exception()
     {
         $method = new \ReflectionMethod(ChuanglanGateway::class, 'getChannel');
-        $method->setAccessible(true);
         $gateway = \Mockery::mock(ChuanglanGateway::class.'[request]', [[]])->shouldAllowMockingProtectedMethods();
 
         // 无效通道
@@ -200,10 +197,9 @@ class ChuanglanGatewayTest extends TestCase
      *
      * @throws \ReflectionException
      */
-    public function testValidateCodeChannelWrapChannelContent()
+    public function test_validate_code_channel_wrap_channel_content()
     {
         $method = new \ReflectionMethod(ChuanglanGateway::class, 'wrapChannelContent');
-        $method->setAccessible(true);
         $gateway = \Mockery::mock(ChuanglanGateway::class.'[request]', [[]])->shouldAllowMockingProtectedMethods();
 
         $content = '这是短信内容。';
@@ -219,10 +215,9 @@ class ChuanglanGatewayTest extends TestCase
      *
      * @throws \ReflectionException
      */
-    public function testPromotionChannelWrapChannelContent()
+    public function test_promotion_channel_wrap_channel_content()
     {
         $method = new \ReflectionMethod(ChuanglanGateway::class, 'wrapChannelContent');
-        $method->setAccessible(true);
         $gateway = \Mockery::mock(ChuanglanGateway::class.'[request]', [[]])->shouldAllowMockingProtectedMethods();
 
         $content = '这是短信内容。';
@@ -242,10 +237,9 @@ class ChuanglanGatewayTest extends TestCase
      *
      * @throws \ReflectionException
      */
-    public function testPromotionChannelWrapChannelContentWithoutSign()
+    public function test_promotion_channel_wrap_channel_content_without_sign()
     {
         $method = new \ReflectionMethod(ChuanglanGateway::class, 'wrapChannelContent');
-        $method->setAccessible(true);
         $gateway = \Mockery::mock(ChuanglanGateway::class.'[request]', [[]])->shouldAllowMockingProtectedMethods();
 
         $content = '这是短信内容。';
@@ -267,10 +261,9 @@ class ChuanglanGatewayTest extends TestCase
      *
      * @throws \ReflectionException
      */
-    public function testPromotionChannelWrapChannelContentWithoutUnsubscribe()
+    public function test_promotion_channel_wrap_channel_content_without_unsubscribe()
     {
         $method = new \ReflectionMethod(ChuanglanGateway::class, 'wrapChannelContent');
-        $method->setAccessible(true);
         $gateway = \Mockery::mock(ChuanglanGateway::class.'[request]', [[]])->shouldAllowMockingProtectedMethods();
 
         $content = '这是短信内容。';

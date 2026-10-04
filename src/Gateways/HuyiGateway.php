@@ -26,20 +26,16 @@ class HuyiGateway extends Gateway
 {
     use HasHttpRequest;
 
-    const ENDPOINT_URL = 'http://106.ihuyi.com/webservice/sms.php?method=Submit';
+    public const ENDPOINT_URL = 'http://106.ihuyi.com/webservice/sms.php?method=Submit';
 
-    const ENDPOINT_FORMAT = 'json';
+    public const ENDPOINT_FORMAT = 'json';
 
-    const SUCCESS_CODE = 2;
+    public const SUCCESS_CODE = 2;
 
     /**
-     * @param \Overtrue\EasySms\Contracts\PhoneNumberInterface $to
-     * @param \Overtrue\EasySms\Contracts\MessageInterface     $message
-     * @param \Overtrue\EasySms\Support\Config                 $config
-     *
      * @return array
      *
-     * @throws \Overtrue\EasySms\Exceptions\GatewayErrorException ;
+     * @throws GatewayErrorException ;
      */
     public function send(PhoneNumberInterface $to, MessageInterface $message, Config $config)
     {
@@ -56,7 +52,7 @@ class HuyiGateway extends Gateway
 
         $result = $this->post(self::ENDPOINT_URL, $params);
 
-        if (self::SUCCESS_CODE != $result['code']) {
+        if ($result['code'] != self::SUCCESS_CODE) {
             throw new GatewayErrorException($result['msg'], $result['code'], $result);
         }
 
@@ -66,8 +62,7 @@ class HuyiGateway extends Gateway
     /**
      * Generate Sign.
      *
-     * @param array $params
-     *
+     * @param  array  $params
      * @return string
      */
     protected function generateSign($params)

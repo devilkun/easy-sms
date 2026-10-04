@@ -30,28 +30,24 @@ class ChuanglanGateway extends Gateway
     /**
      * URL模板
      */
-    const ENDPOINT_URL_TEMPLATE = 'https://%s.253.com/msg/send/json';
+    public const ENDPOINT_URL_TEMPLATE = 'https://%s.253.com/msg/send/json';
 
     /**
      * 国际短信
      */
-    const INT_URL = 'http://intapi.253.com/send/json';
+    public const INT_URL = 'http://intapi.253.com/send/json';
 
     /**
      * 验证码渠道code.
      */
-    const CHANNEL_VALIDATE_CODE = 'smsbj1';
+    public const CHANNEL_VALIDATE_CODE = 'smsbj1';
 
     /**
      * 会员营销渠道code.
      */
-    const CHANNEL_PROMOTION_CODE = 'smssh1';
+    public const CHANNEL_PROMOTION_CODE = 'smssh1';
 
     /**
-     * @param PhoneNumberInterface $to
-     * @param MessageInterface     $message
-     * @param Config               $config
-     *
      * @return array
      *
      * @throws GatewayErrorException
@@ -59,7 +55,7 @@ class ChuanglanGateway extends Gateway
      */
     public function send(PhoneNumberInterface $to, MessageInterface $message, Config $config)
     {
-        $IDDCode = !empty($to->getIDDCode()) ? $to->getIDDCode() : 86;
+        $IDDCode = ! empty($to->getIDDCode()) ? $to->getIDDCode() : 86;
 
         $params = [
             'account' => $config->get('account'),
@@ -68,7 +64,7 @@ class ChuanglanGateway extends Gateway
             'msg' => $this->wrapChannelContent($message->getContent($this), $config, $IDDCode),
         ];
 
-        if (86 != $IDDCode) {
+        if ($IDDCode != 86) {
             $params['mobile'] = $to->getIDDCode().$to->getNumber();
             $params['account'] = $config->get('intel_account') ?: $config->get('account');
             $params['password'] = $config->get('intel_password') ?: $config->get('password');
@@ -76,7 +72,7 @@ class ChuanglanGateway extends Gateway
 
         $result = $this->postJson($this->buildEndpoint($config, $IDDCode), $params);
 
-        if (!isset($result['code']) || '0' != $result['code']) {
+        if (! isset($result['code']) || $result['code'] != '0') {
             throw new GatewayErrorException(json_encode($result, JSON_UNESCAPED_UNICODE), isset($result['code']) ? $result['code'] : 0, $result);
         }
 
@@ -84,9 +80,7 @@ class ChuanglanGateway extends Gateway
     }
 
     /**
-     * @param Config $config
-     * @param int    $IDDCode
-     *
+     * @param  int  $IDDCode
      * @return string
      *
      * @throws InvalidArgumentException
@@ -95,7 +89,7 @@ class ChuanglanGateway extends Gateway
     {
         $channel = $this->getChannel($config, $IDDCode);
 
-        if (self::INT_URL === $channel) {
+        if ($channel === self::INT_URL) {
             return $channel;
         }
 
@@ -103,21 +97,18 @@ class ChuanglanGateway extends Gateway
     }
 
     /**
-     * @param Config $config
-     * @param int    $IDDCode
-     *
-     * @return mixed
+     * @param  int  $IDDCode
      *
      * @throws InvalidArgumentException
      */
     protected function getChannel(Config $config, $IDDCode)
     {
-        if (86 != $IDDCode) {
+        if ($IDDCode != 86) {
             return self::INT_URL;
         }
         $channel = $config->get('channel', self::CHANNEL_VALIDATE_CODE);
 
-        if (!in_array($channel, [self::CHANNEL_VALIDATE_CODE, self::CHANNEL_PROMOTION_CODE])) {
+        if (! in_array($channel, [self::CHANNEL_VALIDATE_CODE, self::CHANNEL_PROMOTION_CODE])) {
             throw new InvalidArgumentException('Invalid channel for ChuanglanGateway.');
         }
 
@@ -125,10 +116,8 @@ class ChuanglanGateway extends Gateway
     }
 
     /**
-     * @param string $content
-     * @param Config $config
-     * @param int    $IDDCode
-     *
+     * @param  string  $content
+     * @param  int  $IDDCode
      * @return string|string
      *
      * @throws InvalidArgumentException
@@ -137,7 +126,7 @@ class ChuanglanGateway extends Gateway
     {
         $channel = $this->getChannel($config, $IDDCode);
 
-        if (self::CHANNEL_PROMOTION_CODE == $channel) {
+        if ($channel == self::CHANNEL_PROMOTION_CODE) {
             $sign = (string) $config->get('sign', '');
             if (empty($sign)) {
                 throw new InvalidArgumentException('Invalid sign for ChuanglanGateway when using promotion channel');

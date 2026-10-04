@@ -26,21 +26,17 @@ class RongheyunGateway extends Gateway
 {
     use HasHttpRequest;
 
-    const ENDPOINT_URL = 'https://api.mix2.zthysms.com/v2/sendSmsTp';
+    public const ENDPOINT_URL = 'https://api.mix2.zthysms.com/v2/sendSmsTp';
 
     /**
-     * @param \Overtrue\EasySms\Contracts\PhoneNumberInterface $to
-     * @param \Overtrue\EasySms\Contracts\MessageInterface     $message
-     * @param \Overtrue\EasySms\Support\Config                 $config
-     *
      * @return array
      *
-     * @throws \Overtrue\EasySms\Exceptions\GatewayErrorException ;
+     * @throws GatewayErrorException ;
      */
     public function send(PhoneNumberInterface $to, MessageInterface $message, Config $config)
     {
         $tKey = time();
-        $password = md5(md5($config->get('password')) . $tKey);
+        $password = md5(md5($config->get('password')).$tKey);
         $params = [
             'username' => $config->get('username', ''),
             'password' => $password,
@@ -60,7 +56,7 @@ class RongheyunGateway extends Gateway
             $params,
             ['Content-Type' => 'application/json; charset="UTF-8"']
         );
-        if (200 != $result['code']) {
+        if ($result['code'] != 200) {
             throw new GatewayErrorException($result['msg'], $result['code'], $result);
         }
 

@@ -24,18 +24,14 @@ class UcloudGateway extends Gateway
 {
     use HasHttpRequest;
 
-    const ENDPOINT_URL = 'https://api.ucloud.cn';
+    public const ENDPOINT_URL = 'https://api.ucloud.cn';
 
-    const ENDPOINT_Action = 'SendUSMSMessage';
+    public const ENDPOINT_Action = 'SendUSMSMessage';
 
-    const SUCCESS_CODE = 0;
+    public const SUCCESS_CODE = 0;
 
     /**
      * Send Message.
-     *
-     * @param PhoneNumberInterface $to
-     * @param MessageInterface     $message
-     * @param Config               $config
      *
      * @return array
      *
@@ -47,7 +43,7 @@ class UcloudGateway extends Gateway
 
         $result = $this->get(self::ENDPOINT_URL, $params);
 
-        if (self::SUCCESS_CODE != $result['RetCode']) {
+        if ($result['RetCode'] != self::SUCCESS_CODE) {
             throw new GatewayErrorException($result['Message'], $result['RetCode'], $result);
         }
 
@@ -57,10 +53,6 @@ class UcloudGateway extends Gateway
     /**
      * Build Params.
      *
-     * @param PhoneNumberInterface $to
-     * @param MessageInterface     $message
-     * @param Config               $config
-     *
      * @return array
      */
     protected function buildParams(PhoneNumberInterface $to, MessageInterface $message, Config $config)
@@ -68,23 +60,23 @@ class UcloudGateway extends Gateway
         $data = $message->getData($this);
         $params = [
             'Action' => self::ENDPOINT_Action,
-            'SigContent' => !empty($data['sig_content']) ? $data['sig_content'] : $config->get('sig_content', ''),
+            'SigContent' => ! empty($data['sig_content']) ? $data['sig_content'] : $config->get('sig_content', ''),
             'TemplateId' => $message->getTemplate($this),
             'PublicKey' => $config->get('public_key'),
         ];
         $code = isset($data['code']) ? $data['code'] : '';
-        if (is_array($code) && !empty($code)) {
+        if (is_array($code) && ! empty($code)) {
             foreach ($code as $key => $value) {
                 $params['TemplateParams.'.$key] = $value;
             }
         } else {
-            if (!empty($code) || !is_null($code)) {
+            if (! empty($code) || ! is_null($code)) {
                 $params['TemplateParams.0'] = $code;
             }
         }
 
         $mobiles = isset($data['mobiles']) ? $data['mobiles'] : '';
-        if (!empty($mobiles) && !is_null($mobiles)) {
+        if (! empty($mobiles) && ! is_null($mobiles)) {
             if (is_array($mobiles)) {
                 foreach ($mobiles as $key => $value) {
                     $params['PhoneNumbers.'.$key] = $value;
@@ -96,7 +88,7 @@ class UcloudGateway extends Gateway
             $params['PhoneNumbers.0'] = $to->getNumber();
         }
 
-        if (!is_null($config->get('project_id')) && !empty($config->get('project_id'))) {
+        if (! is_null($config->get('project_id')) && ! empty($config->get('project_id'))) {
             $params['ProjectId'] = $config->get('project_id');
         }
 
@@ -109,9 +101,8 @@ class UcloudGateway extends Gateway
     /**
      * Generate Sign.
      *
-     * @param array  $params
-     * @param string $privateKey
-     *
+     * @param  array  $params
+     * @param  string  $privateKey
      * @return string
      */
     protected function getSignature($params, $privateKey)

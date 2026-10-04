@@ -20,7 +20,7 @@ use Overtrue\EasySms\Tests\TestCase;
 
 class YunzhixunGatewayTest extends TestCase
 {
-    public function testSend()
+    public function test_send()
     {
         $config = [
             'sid' => 'mock-sid',
@@ -65,7 +65,7 @@ class YunzhixunGatewayTest extends TestCase
         $this->assertSame('mock-result', $gateway->send($phone, $message, $config));
     }
 
-    public function testSendWithBatch()
+    public function test_send_with_batch()
     {
         $config = [
             'sid' => 'mock-sid',
@@ -112,7 +112,7 @@ class YunzhixunGatewayTest extends TestCase
         $this->assertSame('mock-result', $gateway->send($phone, $message, $config));
     }
 
-    public function testBuildEndpoint()
+    public function test_build_endpoint()
     {
         $config = [
             'sid' => 'mock-sid',
@@ -121,7 +121,6 @@ class YunzhixunGatewayTest extends TestCase
         ];
 
         $method = new \ReflectionMethod(YunzhixunGateway::class, 'buildEndpoint');
-        $method->setAccessible(true);
 
         $gateway = \Mockery::mock(YunzhixunGateway::class, [$config])->shouldAllowMockingProtectedMethods();
 
@@ -141,7 +140,7 @@ class YunzhixunGatewayTest extends TestCase
         );
     }
 
-    public function testBuildParams()
+    public function test_build_params()
     {
         $config = [
             'sid' => 'mock-sid',
@@ -150,7 +149,6 @@ class YunzhixunGatewayTest extends TestCase
         ];
 
         $method = new \ReflectionMethod(YunzhixunGateway::class, 'buildParams');
-        $method->setAccessible(true);
 
         $gateway = \Mockery::mock(YunzhixunGateway::class, [$config])->shouldAllowMockingProtectedMethods();
 
@@ -190,7 +188,7 @@ class YunzhixunGatewayTest extends TestCase
         ], $method->invoke($gateway, $phone, $message, $config));
     }
 
-    public function testExecute()
+    public function test_execute()
     {
         $config = [
             'sid' => 'mock-sid',
@@ -199,7 +197,6 @@ class YunzhixunGatewayTest extends TestCase
         ];
 
         $method = new \ReflectionMethod(YunzhixunGateway::class, 'execute');
-        $method->setAccessible(true);
 
         $gateway = \Mockery::mock(YunzhixunGateway::class.'[postJson]', [$config]);
         $gateway->shouldAllowMockingProtectedMethods();

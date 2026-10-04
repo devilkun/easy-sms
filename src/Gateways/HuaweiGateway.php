@@ -23,18 +23,14 @@ class HuaweiGateway extends Gateway
 {
     use HasHttpRequest;
 
-    const ENDPOINT_HOST = 'https://api.rtc.huaweicloud.com:10443';
+    public const ENDPOINT_HOST = 'https://api.rtc.huaweicloud.com:10443';
 
-    const ENDPOINT_URI = '/sms/batchSendSms/v1';
+    public const ENDPOINT_URI = '/sms/batchSendSms/v1';
 
-    const SUCCESS_CODE = '000000';
+    public const SUCCESS_CODE = '000000';
 
     /**
      * 发送信息.
-     *
-     * @param PhoneNumberInterface $to
-     * @param MessageInterface     $message
-     * @param Config               $config
      *
      * @return array
      *
@@ -78,14 +74,14 @@ class HuaweiGateway extends Gateway
             $result = $this->request('post', $endpoint, [
                 'headers' => $headers,
                 'form_params' => $params,
-                //为防止因HTTPS证书认证失败造成API调用失败，需要先忽略证书信任问题
+                // 为防止因HTTPS证书认证失败造成API调用失败，需要先忽略证书信任问题
                 'verify' => false,
             ]);
         } catch (RequestException $e) {
             $result = $this->unwrapResponse($e->getResponse());
         }
 
-        if (self::SUCCESS_CODE != $result['code']) {
+        if ($result['code'] != self::SUCCESS_CODE) {
             throw new GatewayErrorException($result['description'], ltrim($result['code'], 'E'), $result);
         }
 
@@ -94,8 +90,6 @@ class HuaweiGateway extends Gateway
 
     /**
      * 构造 Endpoint.
-     *
-     * @param Config $config
      *
      * @return string
      */
@@ -109,9 +103,8 @@ class HuaweiGateway extends Gateway
     /**
      * 获取请求 Headers 参数.
      *
-     * @param string $appKey
-     * @param string $appSecret
-     *
+     * @param  string  $appKey
+     * @param  string  $appSecret
      * @return array
      */
     protected function getHeaders($appKey, $appSecret)
@@ -126,16 +119,15 @@ class HuaweiGateway extends Gateway
     /**
      * 构造X-WSSE参数值
      *
-     * @param string $appKey
-     * @param string $appSecret
-     *
+     * @param  string  $appKey
+     * @param  string  $appSecret
      * @return string
      */
     protected function buildWsseHeader($appKey, $appSecret)
     {
         $now = date('Y-m-d\TH:i:s\Z');
         $nonce = uniqid();
-        $passwordDigest = base64_encode(hash('sha256', ($nonce.$now.$appSecret)));
+        $passwordDigest = base64_encode(hash('sha256', $nonce.$now.$appSecret));
 
         return sprintf(
             'UsernameToken Username="%s",PasswordDigest="%s",Nonce="%s",Created="%s"',

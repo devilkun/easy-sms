@@ -19,25 +19,26 @@ use Overtrue\EasySms\Support\Config;
 use Overtrue\EasySms\Tests\TestCase;
 
 /**
- * Class SmsbaoGatewayTest
+ * Class SmsbaoGatewayTest.
+ *
  * @author iwindy <203962638@qq.com>
  */
 class SmsbaoGatewayTest extends TestCase
 {
-    public function testSendWithSMS()
+    public function test_send_with_sms()
     {
         $config = [
             'user' => 'mock-user',
-            'password' => 'mock-password'
+            'password' => 'mock-password',
         ];
 
-        $gateway = \Mockery::mock(SmsbaoGateway::class . '[get]', [$config])->shouldAllowMockingProtectedMethods();
+        $gateway = \Mockery::mock(SmsbaoGateway::class.'[get]', [$config])->shouldAllowMockingProtectedMethods();
 
         $params = [
             'u' => 'mock-user',
             'p' => md5('mock-password'),
             'm' => '18188888888',
-            'c' => 'This is a test message.'
+            'c' => 'This is a test message.',
         ];
 
         $endpoint = sprintf(SmsbaoGateway::ENDPOINT_URL, 'sms');
@@ -59,20 +60,20 @@ class SmsbaoGatewayTest extends TestCase
         $gateway->send(new PhoneNumber(18188888888), $message, $config);
     }
 
-    public function testSendWithWSMS()
+    public function test_send_with_wsms()
     {
         $config = [
             'user' => 'mock-user',
-            'password' => 'mock-password'
+            'password' => 'mock-password',
         ];
 
-        $gateway = \Mockery::mock(SmsbaoGateway::class . '[get]', [$config])->shouldAllowMockingProtectedMethods();
+        $gateway = \Mockery::mock(SmsbaoGateway::class.'[get]', [$config])->shouldAllowMockingProtectedMethods();
 
         $params = [
             'u' => 'mock-user',
             'p' => md5('mock-password'),
             'm' => '+8518188888888',
-            'c' => 'This is a test message.'
+            'c' => 'This is a test message.',
         ];
 
         $endpoint = sprintf(SmsbaoGateway::ENDPOINT_URL, 'wsms');

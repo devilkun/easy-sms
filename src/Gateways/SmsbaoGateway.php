@@ -18,17 +18,19 @@ use Overtrue\EasySms\Support\Config;
 use Overtrue\EasySms\Traits\HasHttpRequest;
 
 /**
- * Class SmsbaoGateway
+ * Class SmsbaoGateway.
+ *
  * @author iwindy <203962638@qq.com>
+ *
  * @see http://www.smsbao.com/openapi/
  */
 class SmsbaoGateway extends Gateway
 {
     use HasHttpRequest;
 
-    const ENDPOINT_URL = 'http://api.smsbao.com/%s';
+    public const ENDPOINT_URL = 'http://api.smsbao.com/%s';
 
-    const SUCCESS_CODE = '0';
+    public const SUCCESS_CODE = '0';
 
     protected $errorStatuses = [
         '0' => '短信发送成功',
@@ -39,7 +41,7 @@ class SmsbaoGateway extends Gateway
         '41' => '余额不足',
         '42' => '帐户已过期',
         '43' => 'IP地址限制',
-        '50' => '内容含有敏感词'
+        '50' => '内容含有敏感词',
     ];
 
     public function send(PhoneNumberInterface $to, MessageInterface $message, Config $config)
@@ -58,7 +60,7 @@ class SmsbaoGateway extends Gateway
             'u' => $config->get('user'),
             'p' => md5($config->get('password')),
             'm' => $number,
-            'c' => $data
+            'c' => $data,
         ];
 
         $result = $this->get($this->buildEndpoint($action), $params);

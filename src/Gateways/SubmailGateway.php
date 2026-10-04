@@ -26,34 +26,42 @@ class SubmailGateway extends Gateway
 {
     use HasHttpRequest;
 
-    const ENDPOINT_TEMPLATE = 'https://api.mysubmail.com/%s.%s';
+    public const ENDPOINT_TEMPLATE = 'https://api.mysubmail.com/%s.%s';
 
-    const ENDPOINT_FORMAT = 'json';
+    public const ENDPOINT_FORMAT = 'json';
 
     /**
-     * @param \Overtrue\EasySms\Contracts\PhoneNumberInterface $to
-     * @param \Overtrue\EasySms\Contracts\MessageInterface     $message
-     * @param \Overtrue\EasySms\Support\Config                 $config
-     *
      * @return array
      *
-     * @throws \Overtrue\EasySms\Exceptions\GatewayErrorException ;
+     * @throws GatewayErrorException ;
      */
     public function send(PhoneNumberInterface $to, MessageInterface $message, Config $config)
     {
-        $endpoint = $this->buildEndpoint($this->inChineseMainland($to) ? 'message/xsend' : 'internationalsms/xsend');
+        $isContent = (bool) $message->getContent($this);
+        if ($isContent) {
+            $endpoint = $this->buildEndpoint($this->inChineseMainland($to) ? 'sms/send' : 'internationalsms/send');
+            $params = [
+                'appid' => $config->get('app_id'),
+                'signature' => $config->get('app_key'),
+                'content' => $message->getContent($this),
+                'to' => $to->getUniversalNumber(),
+            ];
+        } else {
+            $endpoint = $this->buildEndpoint($this->inChineseMainland($to) ? 'message/xsend' : 'internationalsms/xsend');
+            $data = $message->getData($this);
+            $template_code = $message->getTemplate($this);
+            $params = [
+                'appid' => $config->get('app_id'),
+                'signature' => $config->get('app_key'),
+                'project' => ! empty($template_code) ? $template_code : (! empty($data['project']) ? $data['project'] : $config->get('project')),
+                'to' => $to->getUniversalNumber(),
+                'vars' => json_encode($data, JSON_FORCE_OBJECT),
+            ];
+        }
 
-        $data = $message->getData($this);
+        $result = $this->post($endpoint, $params);
 
-        $result = $this->post($endpoint, [
-            'appid' => $config->get('app_id'),
-            'signature' => $config->get('app_key'),
-            'project' => !empty($data['project']) ? $data['project'] : $config->get('project'),
-            'to' => $to->getUniversalNumber(),
-            'vars' => json_encode($data, JSON_FORCE_OBJECT),
-        ]);
-
-        if ('success' != $result['status']) {
+        if ($result['status'] != 'success') {
             throw new GatewayErrorException($result['msg'], $result['code'], $result);
         }
 
@@ -63,8 +71,7 @@ class SubmailGateway extends Gateway
     /**
      * Build endpoint url.
      *
-     * @param string $function
-     *
+     * @param  string  $function
      * @return string
      */
     protected function buildEndpoint($function)
@@ -75,14 +82,13 @@ class SubmailGateway extends Gateway
     /**
      * Check if the phone number belongs to chinese mainland.
      *
-     * @param \Overtrue\EasySms\Contracts\PhoneNumberInterface $to
-     *
+     * @param  PhoneNumberInterface  $to
      * @return bool
      */
     protected function inChineseMainland($to)
     {
         $code = $to->getIDDCode();
 
-        return empty($code) || 86 === $code;
+        return empty($code) || $code === 86;
     }
 }

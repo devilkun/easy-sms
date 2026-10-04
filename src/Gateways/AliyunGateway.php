@@ -28,34 +28,30 @@ class AliyunGateway extends Gateway
 {
     use HasHttpRequest;
 
-    const ENDPOINT_URL = 'http://dysmsapi.aliyuncs.com';
+    public const ENDPOINT_URL = 'http://dysmsapi.aliyuncs.com';
 
-    const ENDPOINT_METHOD = 'SendSms';
+    public const ENDPOINT_METHOD = 'SendSms';
 
-    const ENDPOINT_VERSION = '2017-05-25';
+    public const ENDPOINT_VERSION = '2017-05-25';
 
-    const ENDPOINT_FORMAT = 'JSON';
+    public const ENDPOINT_FORMAT = 'JSON';
 
-    const ENDPOINT_REGION_ID = 'cn-hangzhou';
+    public const ENDPOINT_REGION_ID = 'cn-hangzhou';
 
-    const ENDPOINT_SIGNATURE_METHOD = 'HMAC-SHA1';
+    public const ENDPOINT_SIGNATURE_METHOD = 'HMAC-SHA1';
 
-    const ENDPOINT_SIGNATURE_VERSION = '1.0';
+    public const ENDPOINT_SIGNATURE_VERSION = '1.0';
 
     /**
-     * @param \Overtrue\EasySms\Contracts\PhoneNumberInterface $to
-     * @param \Overtrue\EasySms\Contracts\MessageInterface     $message
-     * @param \Overtrue\EasySms\Support\Config                 $config
-     *
      * @return array
      *
-     * @throws \Overtrue\EasySms\Exceptions\GatewayErrorException ;
+     * @throws GatewayErrorException ;
      */
     public function send(PhoneNumberInterface $to, MessageInterface $message, Config $config)
     {
         $data = $message->getData($this);
 
-        $signName = !empty($data['sign_name']) ? $data['sign_name'] : $config->get('sign_name');
+        $signName = ! empty($data['sign_name']) ? $data['sign_name'] : $config->get('sign_name');
 
         unset($data['sign_name']);
 
@@ -69,7 +65,7 @@ class AliyunGateway extends Gateway
             'Timestamp' => gmdate('Y-m-d\TH:i:s\Z'),
             'Action' => self::ENDPOINT_METHOD,
             'Version' => self::ENDPOINT_VERSION,
-            'PhoneNumbers' => !\is_null($to->getIDDCode()) ? strval($to->getZeroPrefixedNumber()) : $to->getNumber(),
+            'PhoneNumbers' => ! \is_null($to->getIDDCode()) ? strval($to->getZeroPrefixedNumber()) : $to->getNumber(),
             'SignName' => $signName,
             'TemplateCode' => $message->getTemplate($this),
             'TemplateParam' => json_encode($data, JSON_FORCE_OBJECT),
@@ -79,7 +75,7 @@ class AliyunGateway extends Gateway
 
         $result = $this->get(self::ENDPOINT_URL, $params);
 
-        if (!empty($result['Code']) && 'OK' != $result['Code']) {
+        if (! empty($result['Code']) && $result['Code'] != 'OK') {
             throw new GatewayErrorException($result['Message'], $result['Code'], $result);
         }
 
@@ -89,8 +85,7 @@ class AliyunGateway extends Gateway
     /**
      * Generate Sign.
      *
-     * @param array $params
-     *
+     * @param  array  $params
      * @return string
      *
      * @see https://help.aliyun.com/document_detail/101343.html

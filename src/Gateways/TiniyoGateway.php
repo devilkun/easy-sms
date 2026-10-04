@@ -26,9 +26,9 @@ class TiniyoGateway extends Gateway
 {
     use HasHttpRequest;
 
-    const ENDPOINT_URL = 'https://api.tiniyo.com/v1/Account/%s/Message';
+    public const ENDPOINT_URL = 'https://api.tiniyo.com/v1/Account/%s/Message';
 
-    const SUCCESS_CODE = '000000';
+    public const SUCCESS_CODE = '000000';
 
     public function getName()
     {
@@ -36,13 +36,9 @@ class TiniyoGateway extends Gateway
     }
 
     /**
-     * @param \Overtrue\EasySms\Contracts\PhoneNumberInterface $to
-     * @param \Overtrue\EasySms\Contracts\MessageInterface     $message
-     * @param \Overtrue\EasySms\Support\Config                 $config
-     *
      * @return array
      *
-     * @throws \Overtrue\EasySms\Exceptions\GatewayErrorException
+     * @throws GatewayErrorException
      */
     public function send(PhoneNumberInterface $to, MessageInterface $message, Config $config)
     {
@@ -64,7 +60,7 @@ class TiniyoGateway extends Gateway
             ],
         ]);
 
-        if (self::SUCCESS_CODE != $result['statusCode']) {
+        if ($result['statusCode'] != self::SUCCESS_CODE) {
             throw new GatewayErrorException($result['statusCode'], $result['statusCode'], $result);
         }
 
@@ -74,8 +70,7 @@ class TiniyoGateway extends Gateway
     /**
      * build endpoint url.
      *
-     * @param string $accountSid
-     *
+     * @param  string  $accountSid
      * @return string
      */
     protected function buildEndPoint($accountSid)

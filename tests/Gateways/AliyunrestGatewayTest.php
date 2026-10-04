@@ -23,7 +23,7 @@ use Overtrue\EasySms\Tests\TestCase;
  */
 class AliyunrestGatewayTest extends TestCase
 {
-    public function testSend()
+    public function test_send()
     {
         $urlParams = [
             'app_key' => 'mock-app-key',
@@ -51,7 +51,7 @@ class AliyunrestGatewayTest extends TestCase
         $gateway = \Mockery::mock(AliyunrestGateway::class.'[post]', [$config])->shouldAllowMockingProtectedMethods();
         $gateway->shouldReceive('post')->with(\Mockery::on(function ($url) use ($urlParams) {
             $url = implode('&', array_filter(explode('&', $url), function ($s) {
-                return 'sign=' != substr($s, 0, 5);
+                return substr($s, 0, 5) != 'sign=';
             }));
 
             return $url == 'http://gw.api.taobao.com/router/rest?'.http_build_query($urlParams);
@@ -63,10 +63,10 @@ class AliyunrestGatewayTest extends TestCase
                     'err_code' => '0', 'msg' => 'mock-result', 'success' => true,
                 ],
             ], ], [
-            'error_response' => [
-                'code' => 15,
-                'msg' => 'mock-err-msg',
-            ], ])->twice();
+                'error_response' => [
+                    'code' => 15,
+                    'msg' => 'mock-err-msg',
+                ], ])->twice();
 
         $message = new Message([
             'template' => 'mock-template-code',

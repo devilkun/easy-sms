@@ -16,6 +16,7 @@ use Overtrue\EasySms\Contracts\PhoneNumberInterface;
 use Overtrue\EasySms\Exceptions\GatewayErrorException;
 use Overtrue\EasySms\Support\Config;
 use Overtrue\EasySms\Traits\HasHttpRequest;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Class KingttoGateWay.
@@ -26,16 +27,12 @@ class KingttoGateway extends Gateway
 {
     use HasHttpRequest;
 
-    const ENDPOINT_URL = 'http://101.201.41.194:9999/sms.aspx';
+    public const ENDPOINT_URL = 'http://101.201.41.194:9999/sms.aspx';
 
-    const ENDPOINT_METHOD = 'send';
+    public const ENDPOINT_METHOD = 'send';
 
     /**
-     * @param PhoneNumberInterface $to
-     * @param MessageInterface     $message
-     * @param Config               $config
-     *
-     * @return \Psr\Http\Message\ResponseInterface|array|string
+     * @return ResponseInterface|array|string
      *
      * @throws GatewayErrorException
      */
@@ -52,7 +49,7 @@ class KingttoGateway extends Gateway
 
         $result = $this->post(self::ENDPOINT_URL, $params);
 
-        if ('Success' != $result['returnstatus']) {
+        if ($result['returnstatus'] != 'Success') {
             throw new GatewayErrorException($result['message'], $result['remainpoint'], $result);
         }
 

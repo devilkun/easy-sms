@@ -3,16 +3,14 @@
 namespace Overtrue\EasySms\Tests\Gateways;
 
 use Overtrue\EasySms\Exceptions\GatewayErrorException;
+use Overtrue\EasySms\Gateways\AliyunIntlGateway;
 use Overtrue\EasySms\Message;
 use Overtrue\EasySms\PhoneNumber;
 use Overtrue\EasySms\Support\Config;
 use Overtrue\EasySms\Tests\TestCase;
-use Overtrue\EasySms\Gateways\AliyunIntlGateway;
 
 /**
- * Class AliyunIntlGatewayTest
- *
- * @package \Overtrue\EasySms\Tests\Gateways
+ * Class AliyunIntlGatewayTest.
  */
 class AliyunIntlGatewayTest extends TestCase
 {
@@ -44,26 +42,26 @@ class AliyunIntlGatewayTest extends TestCase
         ];
 
         $gateway->shouldReceive('get')
-                ->with(AliyunIntlGateway::ENDPOINT_URL, \Mockery::on(function ($params) use ($expected) {
-                    if (empty($params['Signature'])) {
-                        return false;
-                    }
+            ->with(AliyunIntlGateway::ENDPOINT_URL, \Mockery::on(function ($params) use ($expected) {
+                if (empty($params['Signature'])) {
+                    return false;
+                }
 
-                    unset($params['SignatureNonce'], $params['Timestamp'], $params['Signature']);
+                unset($params['SignatureNonce'], $params['Timestamp'], $params['Signature']);
 
-                    ksort($params);
-                    ksort($expected);
+                ksort($params);
+                ksort($expected);
 
-                    return $params == $expected;
-                }))
-                ->andReturn([
-                    'ResponseCode' => 'OK',
-                    'ResponseDescription' => 'mock-result',
-                ], [
-                    'ResponseCode' => 1234,
-                    'ResponseDescription' => 'mock-err-msg',
-                ])
-                ->twice();
+                return $params == $expected;
+            }))
+            ->andReturn([
+                'ResponseCode' => 'OK',
+                'ResponseDescription' => 'mock-result',
+            ], [
+                'ResponseCode' => 1234,
+                'ResponseDescription' => 'mock-err-msg',
+            ])
+            ->twice();
 
         $message = new Message([
             'template' => 'mock-template-code',
